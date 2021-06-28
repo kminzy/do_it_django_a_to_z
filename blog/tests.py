@@ -10,6 +10,23 @@ class TestView(TestCase):
     def setUp(self):
         self.client = Client() # 테스트를 위한 가상의 사용자
 
+    def navbar_test(self, soup):
+        navbar = soup.nav
+        self.assertIn('Blog', navbar.text)
+        self.assertIn('About Me', navbar.text)
+
+        logo_btn = navbar.find('a', text='Do It Django')
+        self.assertEqual(logo_btn.attrs['href'], '/')
+
+        home_btn = navbar.find('a', text='Home')
+        self.assertEqual(home_btn.attrs['href'], '/')
+
+        blog_btn = navbar.find('a', text='Blog')
+        self.assertEqual(blog_btn.attrs['href'], '/blog/')
+
+        about_me_btn = navbar.find('a', text='About Me')
+        self.assertEqual(about_me_btn.attrs['href'], '/about_me/')
+
     def test_post_list(self):
         # 1.1 포스트 목록 페이지를 가져온다
         response = self.client.get('/blog/') # 127.0.0.1:8000/blog/ 를 입력했다고 가정, 그 페이지 정보를 response에 put
@@ -19,10 +36,7 @@ class TestView(TestCase):
         soup = BeautifulSoup(response.content, 'html.parser') # read -> parser로 파싱
         self.assertEqual(soup.title.text, 'Blog') # title 요소에서 텍스트만 get, Blog인지 확인
         # 1.4 내비게이션 바
-        navbar = soup.nav # nav 요소만 get
-        # 1.5 navbar에는 Blog, About Me 라는 문구 존재
-        self.assertIn('Blog', navbar.text)
-        self.assertIn('About Me', navbar.text)
+        self.navbar_test(soup)
 
         # 2.1 메인 영역에 게시물이 하나도 없다면
         self.assertEqual(Post.objects.count(), 0)
@@ -65,9 +79,7 @@ class TestView(TestCase):
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'html.parser')
         # 2.2 포스트 목록 페이지와 똑같은 navbar가 있다
-        navbar = soup.nav
-        self.assertIn('Blog', navbar.text)
-        self.assertIn('About Me', navbar.text)
+        self.navbar_test(soup)
         # 2.3 첫 번째 포스트의 제목이 웹 브라우저 탭 타이틀에 들어 있다
         self.assertIn(post_001.title, soup.title.text)
         # 2.4 첫 번째 포스트의 제목이 포스트 영역에 있다
@@ -78,3 +90,4 @@ class TestView(TestCase):
         # 아직 작성 불가
         # 2.6 첫 번째 포스트의 내용(content)이 포스트 영역에 있다
         self.assertIn(post_001.content, post_area.text)
+
