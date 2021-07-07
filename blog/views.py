@@ -2,18 +2,21 @@
 from django.shortcuts import render, redirect
 from .models import Post, Category, Tag
 from django.views.generic import ListView, DetailView, CreateView
-from django.contrib.auth.mixins import LoginRequiredMixin # 로그인 했을 때만 정상적으로 페이지 출력
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin # Login: 로그인 했을 때만 정상적으로 페이지 출력
 
 # Create your views here.
 
 
-class PostCreate(LoginRequiredMixin, CreateView): 
+class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Post
     fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
 
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
     def form_valid(self, form):
         current_user = self.request.user # 웹 사이트의 방문자
-        if current_user.is_authenticated: # 로그인 한 상태라면
+        if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser): # superuser / staff로 제한
             form.instance.author = current_user # 새로 생성한 포스트(instance)의 author에 user 담는다
             return super(PostCreate, self).form_valid(form) # 현재 form을 인자로 보내 처리
         else:
