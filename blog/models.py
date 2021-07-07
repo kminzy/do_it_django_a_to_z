@@ -17,6 +17,17 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=200, unique=True, allow_unicode=True) # 고유 URL 생성
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return f'/blog/tag/{self.slug}/'
+
+
 # Create your models here.
 class Post(models.Model):
     title = models.CharField(max_length=30)
@@ -35,6 +46,8 @@ class Post(models.Model):
     # SET_NULL: 이 포스트의 작성자가 DB에서 삭제되어도 포스트 유지, author 필드 값만 null
 
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
+
+    tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
         return f'[{self.pk}] {self.title} :: {self.author}'

@@ -24,9 +24,19 @@
         {% if p.hook_text %}
         <h5 class="text-muted">{{p.hook_text}}</h5>
         {% endif %}
-        <!--                        단어 수로 나눌 때에는 truncatewords-->
-        <!--                        글자 수로 나눌 때에는 truncatechars-->
+        <!--단어 수로 나눌 때에는 truncatewords-->
+        <!--글자 수로 나눌 때에는 truncatechars-->
         <p class="card-text">{{p.content | truncatewords:45}}</p>
+
+        {% if p.tags.exists %}
+            <i class="fas fa-tags"></i>
+            {% for tag in p.tags.iterator %} <!--해당 포스트의 모든 태그 출력-->
+                <a href="{{tag.get_absolute_url}}"><span class="badge badge-pill badge-light">{{tag}}</span></a>
+            {% endfor %}
+            <br/>
+            <br/>
+        {% endif %}
+
         <a class="btn btn-primary" href="{{p.get_absolute_url}}">Read More →</a>
     </div>
     <div class="card-footer text-muted">
