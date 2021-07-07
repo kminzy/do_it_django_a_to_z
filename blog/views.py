@@ -1,6 +1,6 @@
 # from django.shortcuts import render
 from django.shortcuts import render
-from .models import Post, Category
+from .models import Post, Category, Tag
 from django.views.generic import ListView, DetailView
 
 # Create your views here.
@@ -33,6 +33,19 @@ def category_page(request, slug):
                     'no_category_post_count': Post.objects.filter(category=None).count(), # 미분류 포스트, 개수 알려줌
                     'category': category, # 페이지 타이틀 옆에 카테고리 이름 알려준다
                 })
+
+
+def tag_page(request, slug):
+    tag = Tag.objects.get(slug=slug) # url에서 인자로 넘어온 slug와 동일한 slug 가진 태그
+    post_list = tag.post_set.all()
+
+    return render(request, 'blog/post_list.html',
+                  {
+                      'post_list': post_list,
+                      'tag': tag,
+                      'categories': Category.objects.all(),
+                      'no_category_post_count': Post.objects.filter(category=None).count(),
+                  })
 
 
 class PostDetail(DetailView):
